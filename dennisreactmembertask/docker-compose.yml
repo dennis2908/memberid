@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  reactcoreuidm:
+    container_name: reactcoreuidm
+    image: reactcoreuidm/1.0
+    build: .
+    ports:
+      - "3000:3000"
+volumes:
+  pgdata: {}

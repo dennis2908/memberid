@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  dennisnodemembertaskjoin:
+    container_name: dennisnodemembertaskjoin
+    image: dennisnodemembertaskjoin
+    build: ./dennisnodemembertask
+    command: npm start
+    ports:
+      - "8000:8000"
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=dbnodemembertask;Database=postgres;Username=postgres;Password=postgres"
+      # WATCHPACK_POLLING: "true"
+    depends_on:
+      dbnodemembertask:
+        condition: service_healthy
+    x-develop:
+      watch:
+        - action: rebuild
+          path: dennisnodemembertask  
+          ignore:
+            - node_modules/
+  dennisreactmembertask:
+    container_name: dennisreactmembertask
+    image: dennisreactmembertask
+    build: ./dennisreactmembertask
+    command: yarn start
+    ports:
+      - "3300:3300"
+    depends_on:
+      dbnodemembertask:
+        condition: service_healthy
+    x-develop:
+      watch:
+        - action: rebuild
+          path: ./dennisreactmembertask  
+          ignore:
+            - node_modules/          
+  dbnodemembertask:
+    container_name: dbnodemembertask
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5      
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./seeds:/docker-entrypoint-initdb.d
+
+volumes:
+  pgdata: {}
